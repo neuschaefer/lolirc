@@ -10,11 +10,11 @@
 #import <ObjIRC/IRCConnection.h>
 
 #define PROGRAM_NAME @"LOLIRC"
-#define CHANNEL @"#cccac"
 
 @interface LOLIRC: OFObject <OFApplicationDelegate, IRCConnectionDelegate, OFKernelEventObserverDelegate>
 {
 	IRCConnection *_ircConnection;
+	OFString *_channel;
 }
 @end
 
@@ -35,21 +35,53 @@ OF_APPLICATION_DELEGATE(LOLIRC)
 	of_log(@"Initializing IRC connection");
 	_ircConnection = [[IRCConnection alloc] init];
 
-	[_ircConnection setServer: @"irc.hackint.org"];
-	[_ircConnection setNickname: @"lolirc"];
-	[_ircConnection setUsername: @"lolirc"];
-	[_ircConnection setRealname: @"lolirc"];
+	OFSettings *settings =
+		[OFSettings settingsWithApplicationName: @"lolirc"];
+
+	[_ircConnection setServer:
+		[[settings stringForPath: @"connection.server"
+			    defaultValue: @"chat.freenode.net"] copy]];
+
+	[_ircConnection setPort:
+		[settings integerForPath: @"connection.port"
+			    defaultValue: 6667]];
+
+	_channel = [[settings stringForPath: @"connection.channel"
+			       defaultValue: @"#objfw"] copy];
+
+	[_ircConnection setNickname:
+		[[settings stringForPath: @"me.nickname"
+			    defaultValue: @"lolirc"] copy]];
+
+	[_ircConnection setUsername:
+		[[settings stringForPath: @"me.username"
+			    defaultValue: [self defaultUsername]] copy]];
+
+	[_ircConnection setRealname:
+		[[settings stringForPath: @"me.realname"
+			   defaultValue: @"anonymous"] copy]];
+
 	[_ircConnection setDelegate: self];
 
+	of_log(@"Connecting to %@:%d", [_ircConnection server],
+			[_ircConnection port]);
 	[_ircConnection connect];
 	[_ircConnection handleConnection];
+}
+
+- (OFString *)defaultUsername
+{
+	OFString *name = [[OFApplication environment] objectForKey: @"USER"];
+
+	return name != nil? name : @"user";
 }
 
 - (void)connectionWasEstablished: (IRCConnection *)connection
 {
 	of_log(@"Connection with %@ established", [connection server]);
 
-	[connection joinChannel: CHANNEL];
+	of_log(@"Joining channel %@", _channel);
+	[connection joinChannel: _channel];
 }
 
 - (void)connectionWasClosed: (IRCConnection *)connection
@@ -151,6 +183,6 @@ didReceivePrivateMessage: (OFString *)msg
 	}
 
 	[_ircConnection sendMessage: msg
-				 to: CHANNEL];
+				 to: _channel];
 }
 @end
