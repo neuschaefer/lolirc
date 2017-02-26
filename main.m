@@ -93,7 +93,7 @@ OF_APPLICATION_DELEGATE(LOLIRC)
 	   channel: (OFString *)channel
 	    reason: (OFString *)reason
 {
-	[of_stdout writeFormat: @" !! %@ kicked from %@ by %@ (%@)\n", kicked, channel, [user nickname], reason];
+	[of_stdout writeFormat: @" !! %@ was kicked from %@ by %@ (%@)\n", kicked, channel, [user nickname], reason];
 
 	if ([kicked isEqual: [connection nickname]]) {
 		of_log(@"Oh no, I was kicked :-(");
