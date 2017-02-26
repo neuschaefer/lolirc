@@ -18,6 +18,8 @@
 }
 @end
 
+OF_APPLICATION_DELEGATE(LOLIRC)
+
 @implementation LOLIRC
 - (void)applicationDidFinishLaunching;
 {
@@ -152,5 +154,3 @@ didReceivePrivateMessage: (OFString *)msg
 				 to: CHANNEL];
 }
 @end
-
-OF_APPLICATION_DELEGATE(LOLIRC)
