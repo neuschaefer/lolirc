@@ -1,8 +1,10 @@
 SRCS = main.m
-CFLAGS = -Werror
+CFLAGS += -Wall --arc
 
-all:
-	objfw-compile $(CFLAGS) -lobjirc $(SRCS) -o lolirc
+all: lolirc
+
+lolirc: $(SRCS)
+	objfw-compile $(CFLAGS) -lobjirc $(SRCS) -o $@
 
 clean:
 	rm -f $(SRCS:.m=.o) lolirc
